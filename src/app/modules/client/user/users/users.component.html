@@ -1,0 +1,80 @@
+<h4 class="page_title">Manage Users</h4>
+<div class="card">
+  <div class="grid">
+    <div class="col-12 md:col-5">
+      <div class="p-inputgroup">
+        <input type="text" pInputText placeholder="Keyword..." [(ngModel)]="filterValue" [disabled]="isLoading" (keyup.enter)="onClickFilter()">
+        <button type="button" pButton pRipple label="Search" icon="pi pi-search" (click)="isLoading ? '' : onClickFilter()" [style]="isLoading ? {opacity: 0.5} : ''"></button>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-7 text-right">
+<!--      <span class="p-buttonset mt-5">-->
+				<button pButton pRipple label="New User" *ngIf="permission==permissionTypeAll" routerLink="add"></button>
+<!--			</span>-->
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p-table [value]="users" responsiveLayout="stack" responsive="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width:56px"></th>
+        <th [ngClass]="sortActive === 'firstName' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('firstName')">Name</a>
+        </th>
+        <th style="width: 42px;"></th>
+        <th class="" [ngClass]="sortActive === 'email' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('email')">Email Address</a>
+        </th>
+        <th>Role</th>
+        <th style="width: 64px;" [ngClass]="sortActive === 'emailVerified' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('emailVerified')">Verified</a>
+        </th>
+        <th class="" [ngClass]="sortActive === 'last_login' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('last_login')">Last Login</a>
+        </th>
+        <th *ngIf="!noNeedRemoveColumn" style="width:36px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <td class="">
+          <button pButton *ngIf="permission == permissionTypeAll || store.getUser().id == user.id" [routerLink]="['edit/' + user.id]" icon="pi pi-pencil" class="p-button-rounded p-button-outlined"></button>
+        </td>
+        <td class="">
+          <span class="p-column-title">Name</span>
+          {{ user.username }}
+        </td>
+        <td>
+          <span class="p-column-title">&nbsp;</span>
+          <span class="mr-2 p-badge p-component p-badge-no-gutter p-badge-lg p-badge-info">{{ user.username.substring(0,2).toUpperCase() }}</span>
+        </td>
+        <td class=" ">
+          <span class="p-column-title">Email Address</span>
+          {{user.email}}<br>
+          <small>Administrator</small>
+        </td>
+        <td>
+          <span class="p-column-title">Role</span>
+          {{user.DashRoleMapping && user.DashRoleMapping.length > 0 && user.DashRoleMapping[0].DashRole && user.DashRoleMapping[0].DashRole.name || ''}}
+        </td>
+        <td class="">
+          <span class="p-column-title">Verified</span>
+          <div class="inline-block" *ngIf="user.emailVerified"><span class="tag tag-success tag-size-md"><i class="pi pi-check"></i></span></div>
+          <div class="inline-block" *ngIf="!user.emailVerified"><span class="tag tag-danger tag-size-md"><i class="pi pi-times"></i></span></div>
+        </td>
+        <td class="">
+          <span class="p-column-title">Last Login</span>
+          {{user.last_login}}
+        </td>
+        <td *ngIf="!noNeedRemoveColumn">
+          <button *ngIf="!user.isRemoveHidden" pButton type="button" [routerLink]="['delete', user.id]" icon="pi pi-trash" class="p-button-rounded p-button-outlined p-button-danger"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-paginator [rows]="pageSize" [totalRecords]="resultsLength" (onPageChange)="paginate($event)"></p-paginator>
+</div>

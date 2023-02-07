@@ -1,0 +1,19 @@
+image: alpine:3.15.0
+
+deploy:
+  stage: deploy
+  before_script:
+  - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $SSH_IPADDRESS >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+  script:
+  - ssh $SSH_USER@$SSH_IPADDRESS "cd /srv/ecms-frontend && git checkout dev && /usr/bin/git fetch --all && /usr/bin/git reset --hard origin/dev && cd /srv/docker && docker-compose build && docker-compose up -d"
+  artifacts:
+    paths:
+    - public
+  only:
+  - dev

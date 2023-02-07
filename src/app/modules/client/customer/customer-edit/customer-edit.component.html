@@ -1,0 +1,155 @@
+<h4 class="page_title">Edit Customer</h4>
+<button pButton class="p-button-secondary p-button-rounded p-button-text p-button-back" routerLink="../../" icon="pi pi-chevron-left" label="Back"></button>
+<p-blockUI [blocked]="blockContent"></p-blockUI>
+
+<div class="card">
+  <p-tabView>
+    <p-tabPanel header="Company">
+      <h5 class="mt-5">Company Information</h5>
+      <div class="p-fluid grid">
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask1" name="companyName" [ngModel]="customer.companyName" (change)="handleChange('companyName',$event)"/>
+            <label for="inputmask1">Company Name</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask2" name="companyId" [ngModel]="customer.companyId" (change)="handleChange('companyId', $event)"/>
+            <label for="inputmask2">Company ID</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="email" pInputText id="inputmask3" name="billingEmail" [ngModel]="customer.billingEmail" (change)="handleChange('billingEmail',$event)"/>
+            <label for="inputmask3">Billing Email</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask41" name="address" [ngModel]="customer.address" (change)="handleChange('address', $event)"/>
+            <label for="inputmask41">Address</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask31" name="city" [ngModel]="customer.city" (change)="handleChange('city',$event)"/>
+            <label for="inputmask31">City</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask42" name="state" [ngModel]="customer.state" (change)="handleChange('state', $event)"/>
+            <label for="inputmask42">State</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask32" name="zip" [ngModel]="customer.zip" (change)="handleChange('zip',$event)"/>
+            <label for="inputmask32">Zip</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <p-inputMask id="inputmask43" name="phone" [ngModel]="customer.phone" mask="9 (999) 999-9999" (change)="handleChange('phone', $event)"></p-inputMask>
+            <label for="inputmask43">Phone</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="email" pInputText id="inputmask33" name="vatNumber" [ngModel]="customer.vatNumber" (change)="handleChange('vatNumber',$event)"/>
+            <label for="inputmask33">EIN / SSN Number</label>
+          </span>
+        </div>
+      </div>
+      <div class="grid mt-5">
+        <div class="col-6">
+        </div>
+        <div class="col-6 text-right">
+          <button pButton pRipple label="Save Changes" (click)="onSaveDetail()"></button>
+        </div>
+      </div>
+    </p-tabPanel>
+
+    <p-tabPanel header="Contact">
+      <h5 class="mt-5">Contact Information</h5>
+      <div class="p-fluid grid">
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask35" name="firstName" [ngModel]="customer.firstName" (change)="handleChange('firstName',$event)"/>
+            <label for="inputmask35">First Name</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="text" pInputText id="inputmask45" name="lastName" [ngModel]="customer.lastName" (change)="handleChange('lastName', $event)"/>
+            <label for="inputmask45">Last Name</label>
+          </span>
+        </div>
+        <div class="field col-12 md:col-6">
+          <span class="p-float-label">
+            <input type="email" pInputText id="inputmask25" name="contactEmail" [ngModel]="customer.contactEmail" (change)="handleChange('contactEmail', $event)"/>
+            <label for="inputmask25">Email</label>
+          </span>
+        </div>
+      </div>
+      <div class="grid mt-5">
+        <div class="col-6">
+        </div>
+        <div class="col-6 text-right">
+          <button pButton pRipple label="Save Changes" (click)="onSaveDetail()"></button>
+        </div>
+      </div>
+    </p-tabPanel>
+
+    <p-tabPanel header="Settings">
+      <h5 class="mt-5">Specific Customer Settings</h5>
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-6">
+          <label class="form-label">Local DID Fee</label>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">$</span>
+            <p-inputNumber [(ngModel)]="localdid" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true"></p-inputNumber>
+            <span class="p-inputgroup-addon"><i class="pi pi-tags" style="line-height: 1.25;"></i></span>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <label class="form-label">Local DID Setup Fee</label>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">$</span>
+            <p-inputNumber [(ngModel)]="localdid_fee" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true"></p-inputNumber>
+            <span class="p-inputgroup-addon"><i class="pi pi-tags" style="line-height: 1.25;"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid p-fluid">
+        <div class="col-12 md:col-6">
+          <label class="form-label">Toll Free Fee</label>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">$</span>
+            <p-inputNumber [(ngModel)]="tollfree" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true"></p-inputNumber>
+            <span class="p-inputgroup-addon"><i class="pi pi-tags" style="line-height: 1.25;"></i></span>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <label class="form-label">Toll Free Setup Fee</label>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">$</span>
+            <p-inputNumber [(ngModel)]="tollfree_fee" inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [showButtons]="true"></p-inputNumber>
+            <span class="p-inputgroup-addon"><i class="pi pi-tags" style="line-height: 1.25;"></i></span>
+          </div>
+        </div>
+      </div>
+      <div class="grid mt-5">
+        <div class="col-6">
+        </div>
+        <div class="col-6 text-right">
+          <button pButton pRipple label="Save Changes" (click)="onSaveDetail()"></button>
+        </div>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+</div>

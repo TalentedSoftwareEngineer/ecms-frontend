@@ -1,0 +1,76 @@
+<h4 class="page_title">SIP Gateways</h4>
+
+<div class="card">
+  <div class="grid">
+    <div class="col-12 md:col-5">
+      <div class="p-inputgroup">
+        <input type="text" pInputText placeholder="Keyword..." [(ngModel)]="filterValue" [disabled]="isLoading" (keyup.enter)="onClickFilter()">
+        <button type="button" pButton pRipple label="Search" icon="pi pi-search" (click)="isLoading ? '' : onClickFilter()" [style]="isLoading ? {opacity: 0.5} : ''"></button>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-7 text-right">
+      <button pButton pRipple label="SIP Gateway Management" *ngIf="permission==permissionTypeAll" routerLink="add"></button>
+      <button pButton pRipple label="Assign Gateway Order" class="p-button-info mt-2 ml-1" *ngIf="permission==permissionTypeAll" routerLink="order"></button>
+      <button pButton pRipple label="Export" class="p-button-secondary mt-2 ml-1" icon="pi pi-cloud-download" (click)="isLoading || isExporting ? '' : onExport($event) " [style]="isLoading || isExporting ? {opacity: 0.5} : '' " *ngIf="sipGateways && sipGateways.length > 0"></button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p-table [value]="sipGateways" responsiveLayout="stack" responsive="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngIf="permission==permissionTypeAll" style="width: 56px;"></th>
+        <th [ngClass]="sortActive === 'name' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('name')">Name</a>
+        </th>
+        <th class="">Company ID</th>
+        <th [ngClass]="sortActive === 'address' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('address')">Address</a>
+        </th>
+        <th>Port</th>
+        <th class="">DigitsStrip</th>
+        <th class="">Description</th>
+        <th style="width: 56px;"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-sipGateway>
+      <tr>
+        <td *ngIf="permission==permissionTypeAll">
+          <button pButton routerLink="edit/{{sipGateway.id}}" icon="pi pi-pencil" class="p-button-rounded p-button-outlined"></button>
+        </td>
+        <td class="">
+          <span class="p-column-title">Name</span>
+          {{sipGateway.name}}
+        </td>
+        <!-- customer id -->
+        <td class="">
+          <span class="p-column-title">Company ID</span>
+          <h6>{{sipGateway.hasOwnProperty('Customer') ? sipGateway?.Customer.companyId : ''}}</h6>
+        </td>
+        <td class="">
+          <span class="p-column-title">Address</span>
+          {{sipGateway.address}}
+        </td>
+        <td class="">
+          <span class="p-column-title">Port</span>
+          {{sipGateway.port}}
+        </td>
+        <td class=" ">
+          <span class="p-column-title">DigitsStrip</span>
+          {{sipGateway.digitsStrip}}
+        </td>
+        <td class=" ">
+          <span class="p-column-title">Description</span>
+          {{sipGateway.description}}
+        </td>
+        <td>
+          <button pButton icon="pi pi-check" class="p-button-rounded p-button-info p-button-outlined" pTooltip="Make default gateway" tooltipPosition="top" tooltipEvent="hover"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-paginator [rows]="pageSize" [totalRecords]="resultsLength" (onPageChange)="paginate($event)"></p-paginator>
+</div>

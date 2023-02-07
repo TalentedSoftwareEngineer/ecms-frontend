@@ -1,0 +1,71 @@
+<div class="layout-topbar">
+  <button class="p-link layout-menu-button layout-topbar-button p-trigger" (click)="layoutService.onMenuToggle()">
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <a class="layout-topbar-logo" [routerLink]="['/service/dashboard']">
+    <img [src]="logoImg" [hidden]=" logoImg == '' " alt="">
+    <span>CMS</span>
+  </a>
+
+
+  <button class="p-link layout-topbar-menu-button layout-topbar-button p-trigger" (click)="layoutService.showProfileSidebar()">
+    <i class="pi pi-ellipsis-v"></i>
+  </button>
+
+  <div class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+<!--    <button class="p-link layout-topbar-button layout-topbar-mobile" [routerLink]="['/service/user/edit/', this.userId]">-->
+<!--      <i class="pi pi-user-edit"></i>-->
+<!--      <span>Profile</span>-->
+<!--    </button>-->
+    <button pButton *ngFor="let page of quickPages" [icon]="page.icon" [routerLink]="[page.link]" class="p-button-rounded p-button-outlined p-button-info ml-1 mr-1 layout-topbar-desktop" [title]="page.title"></button>
+
+    <div class="layout-topbar-mobile layout-topbar-account">
+      <div class="main_info flex justify-content-start">
+        <div>
+          <span class="p-badge p-component p-badge-no-gutter">{{userInfo.avatarName}}</span>
+        </div>
+        <div class="info">
+          <span class="title">{{userInfo.name}}</span> <br>
+          <span class="value">{{userInfo.email}}</span> <br>
+          <span class="value">{{userInfo.role}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="layout-topbar-mobile layout-topbar-account mb-3">
+      <div class="sub_info">
+        <span class="title">{{userInfo.accountName}}</span> <br>
+        <span class="label">ACCOUNT ID:</span> <span class="value">{{userInfo.accountID}}</span> <br>
+        <span class="label">SUPPORT PIN:</span> <span class="value">{{userInfo.supportPIN}}</span> <br>
+        <span class="label">BALANCE:</span> <span class="value">${{!isAdmin ? balance : '0.00'}}</span>
+      </div>
+    </div>
+
+    <button class="p-link layout-topbar-button layout-topbar-mobile" [routerLink]="['/service/user/edit/', this.userId]">
+      <i class="pi pi-user-edit"></i>
+      <span>Account Settings</span>
+    </button>
+
+    <button class="p-link layout-topbar-button layout-topbar-mobile" [routerLink]="['/service/billing/settings']">
+      <i class="pi pi-wallet"></i>
+      <span>Billing Settings</span>
+    </button>
+
+    <button class="p-link layout-topbar-button layout-topbar-mobile" (click)="toggleMode()">
+      <i class="pi pi-send"></i>
+      <span>{{colorScheme=='dark' ? 'Light' : 'Dark'}} Mode</span>
+    </button>
+
+    <button class="p-link layout-topbar-button layout-topbar-mobile" (click)="onSignout()">
+      <i class="pi pi-sign-out"></i>
+      <span>Sign Out</span>
+    </button>
+
+    <span *ngIf="!isAdmin" class="layout-topbar-desktop balance_widget"><small style="font-size: 10px;">BALANCE</small><br>${{balance}}</span>
+    <p-menu #menu [popup]="true" [model]="menuItems" appendTo="body"></p-menu>
+    <div class="ml-2 p-avatar p-avatar-image p-avatar-circle layout-topbar-desktop" (click)="menu.toggle($event)">
+      <img [src]="avatar" alt="" [hidden]="avatar==''" class="">
+      <div class="p-avatar-text">{{userInfo.name}}<br>{{user?.email}}</div>
+    </div>
+  </div>
+</div>

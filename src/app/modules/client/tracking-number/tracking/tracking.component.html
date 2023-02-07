@@ -1,0 +1,146 @@
+<h4 class="page_title">Tracking Numbers</h4>
+<div class="card">
+  <div class="grid">
+    <div class="col-12 md:col-5">
+      <div class="p-inputgroup">
+        <input type="text" pInputText placeholder="Keyword..." [(ngModel)]="filterValue" [disabled]="isLoading" (keyup.enter)="onClickFilter()" (change)="onChangeFilter($event)" (search)="onSearch($event)" (keyup.enter)="onClickFilter()">
+        <button type="button" pButton pRipple label="Search" icon="pi pi-search" (click)="isLoading ? '' : onClickFilter()" [style]="isLoading ? {opacity: 0.5} : ''"></button>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-7 text-right">
+				<button pButton pRipple label="Tracking Number Management" *ngIf="permission==permissionTypeAll" routerLink="add" class="mr-1"></button>
+				<button pButton pRipple label="Export" class="p-button-secondary" icon="pi pi-cloud-download" (click)="isLoading || isExporting ? '' : onExport($event) " [style]="isLoading || isExporting ? {opacity: 0.5} : '' " *ngIf="numbers && numbers.length > 0"></button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p-table [value]="numbers" responsiveLayout="stack" responsive="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngIf="permission==permissionTypeAll" style="width: 56px;"></th>
+        <th [ngClass]="sortActive === 'tracking_number' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('tracking_number')">Tracking Number</a>
+        </th>
+        <th [ngClass]="sortActive === 'tracking_source' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('tracking_sourceId')">Tracking source</a>
+        </th>
+        <th *ngIf="store.getUserType() == cmsUserType.superAdmin"  [ngClass]="sortActive === 'customerId' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'">
+          <a (click)="onSortChange('customerId')">Company ID</a></th>
+        <th [ngClass]="sortActive === 'routing' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'" >
+          <a (click)="onSortChange('routing')">Routing</a></th>
+        <th [ngClass]="sortActive === 'receiving_number' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'" >
+          <a (click)="onSortChange('receiving_number')">Receiving number</a></th>
+        <!--
+        <th >Call Setting</th>
+        <th ><a tooltip="Schedule" placement="bottom"><i class="fa fa-calendar"></i></a></th>
+        <th ><a tooltip="Notifications triggered for this number" placement="bottom"><i class="fa fa-envelope"></i></a></th>
+        <th ><a tooltip="Text messaging supported" placement="bottom"><i class="fa fa-phone"></i></a></th>
+        -->
+        <th  *ngIf="permission == permissionTypeAll">Active <i tooltipEvent="hover" tooltipPosition="top" pTooltip="Number can receive inbound phone calls" class="pi pi-question-circle"></i></th>
+        <th >Type</th>
+        <th >Total Calls</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-num>
+      <tr>
+        <!-- action cell -->
+        <td class="align-center" *ngIf="permission==permissionTypeAll">
+          <button pButton routerLink="edit/{{num.id}}" icon="pi pi-pencil" class="p-button-rounded p-button-outlined"></button>
+        </td>
+
+        <!-- tracking number -->
+        <td>
+          <span class="p-column-title">Tracking Number</span>
+          {{num.tracking_number && num.tracking_number | mask: '(000) 000-0000'}}
+        </td>
+
+        <!-- tacking source -->
+        <td>
+          <span class="p-column-title">Tracking Source</span>
+          {{num.TrackingSources?.name}}
+        </td>
+
+        <!-- customer id -->
+        <td *ngIf="store.getUserType() == cmsUserType.superAdmin" >
+          <span class="p-column-title">Company ID</span>
+          {{num.Customer.companyId}}
+        </td>
+
+        <!-- routing -->
+        <td >
+          <span class="p-column-title">Routing</span>
+          <div class="inline-block" *ngIf="num.SipGateways == null">
+            {{num?.SipGateways?.name}}
+          </div>
+          <div class="inline-block" *ngIf="num.SipGateways != null">
+            <a class="routing-cell" routerLink="edit/{{num.id}}">
+              Complete Number Setup
+            </a>
+          </div>
+        </td>
+
+        <!-- target numbers -->
+        <td >
+          <span class="p-column-title">Receiving Number</span>
+          <div class="inline-block" *ngIf="num.routing_action == routingActionEnum.ForwardTo.key || num.ReceivingNumber == null">
+            {{num?.ReceivingNumber?.number | mask: '0 (000) 000-0000'}}
+          </div>
+          <div class="inline-block" *ngIf="num.routing_action != routingActionEnum.ForwardTo.key && num.ReceivingNumber != null">
+            <a class="routing-cell" routerLink="edit/{{num.id}}">
+              Complete Number Setup
+            </a>
+          </div>
+        </td>
+
+        <!-- call setting
+        <td >
+            <a>Account Level</a>
+            <ul style="padding-left:0;margin-bottom:2px;font-size:80%;list-style:none;opacity:0.5">
+                <li>Greeting Message</li>
+                <li>Inbound recordings</li>
+                <li>Caller ID</li>
+            </ul>
+        </td>
+        -->
+
+        <!-- calendar
+        <td ></td>
+        -->
+
+        <!-- mail
+        <td ></td>
+        -->
+
+        <!-- phone
+        <td ></td>
+        -->
+
+        <!-- active -->
+        <td *ngIf="permission == permissionTypeAll" >
+          <span class="p-column-title">Active</span>
+          <div class="inline-block" *ngIf="activeId !== num.id || !activeState">
+            Yes
+          </div>
+        </td>
+
+        <!-- type -->
+        <td >
+          <span class="p-column-title">Type</span>
+          <div class="inline-block">
+            {{num?.TrackingSources?.type}}<br>
+            <small style="opacity:0.5">Static</small>
+          </div>
+        </td>
+        <!-- total calls -->
+        <td >
+          <span class="p-column-title">Total Calls</span>
+          {{num?.total_calls}}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-paginator [rows]="pageSize" [totalRecords]="resultsLength" (onPageChange)="paginate($event)"></p-paginator>
+</div>

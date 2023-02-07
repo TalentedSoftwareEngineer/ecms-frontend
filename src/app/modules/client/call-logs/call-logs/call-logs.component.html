@@ -1,0 +1,210 @@
+<h4 class="page_title">Call Logs</h4>
+<div class="card">
+  <div class="grid">
+    <div class="col-12 flex justify-content-start">
+      <p-toggleButton [(ngModel)]="filterPanelOpened" class="mr-2" onLabel="Filter" offLabel="Filter"
+                      onIcon="pi pi-filter-fill" offIcon="pi pi-filter"></p-toggleButton>
+      <p-checkbox [(ngModel)]="isAutoLoading" [binary]="true" label="Auto Load"></p-checkbox>
+    </div>
+    <div class="col-12 md:col-5">
+      <div class="p-inputgroup mr-2">
+        <input type="text" pInputText placeholder="Keyword..." [(ngModel)]="filterValue"
+               (keyup.enter)="onSearch($event)"/>
+        <button type="button" pButton pRipple label="Search" icon="pi pi-search" (click)="onSearch($event)"></button>
+      </div>
+    </div>
+    <div class="col-12 md:col-7 text-right">
+      <button pButton pRipple label="Export" class="p-button-secondary" icon="pi pi-cloud-download"
+              (click)="isLoading || isExporting ? '' : onExport()"
+              [style]="isLoading || isExporting ? {opacity: 0.5} : '' "></button>
+    </div>
+  </div>
+</div>
+
+<div class="card" *ngIf="filterPanelOpened">
+  <filter-panel [dateMode]="dateMode" [strStartDate]="getSubstring(strStartDate)"
+                [strEndDate]="getSubstring(strEndDate)"
+                (toggle)="toggleFilterPanel()"></filter-panel>
+</div>
+
+<div class="card">
+  <div class="grid">
+    <p-table [value]="logs" responsiveLayout="stack" responsive="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th *ngIf="permission==permissionTypeAll"><i class="fa fa-reply"></i></th>
+          <th [ngClass]="sortActive === 'callerNumber' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'"><a
+            (click)="onSortChange('callerNumber')"><i class="fa fa-user"></i>&nbsp;&nbsp;Contact</a></th>
+          <th><i class="fa fa-database"></i>&nbsp;&nbsp;Source</th>
+          <th class="hidden-sm"><i class="fa fa-random"></i>&nbsp;&nbsp;Routing</th>
+          <th class="hidden-sm"><i class="fa fa-play-circle"></i>&nbsp;&nbsp;Audio</th>
+          <th [ngClass]="sortActive === 'metrics' ? 'sorting_' + sortDirection.toLowerCase() :'sorting'"><a
+            (click)="onSortChange('metrics')"><i class="fa fa-server"></i>&nbsp;&nbsp;Metrics</a></th>
+          <th class="hidden-sm" *ngIf="permission==permissionTypeAll"><i class="fa fa-bolt"></i>&nbsp;&nbsp;Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-log let-rowIndex="i" >
+        <tr>
+          <!------------------------------------------- Call/Edit Cell ------------------------------------->
+          <td *ngIf="!log.isCollapse" [hidden]="permission==permissionTypeReadOnly">
+            <div class="action" *ngIf="false">
+              <i class="pi pi-phone"></i>
+              <span class="color-blue">Call</span>
+            </div>
+            <div class="action" *ngIf="false">
+              <a (click)="onEditPanelCollapse(getRowIndex(log), 'contact')">
+                <i class="pi pi-user-edit"></i>
+                <span class="p-text-secondary">{{onEditing && editIndex === getRowIndex(log) ? 'Close' : 'Edit'}}</span>
+              </a>
+            </div>
+          </td>
+
+          <!------------------------------------------- Contact Cell ------------------------------------->
+          <td *ngIf="!log.isCollapse">
+            <h5>
+              <a class="search callerid" *ngIf="log.Phonebook?.name"
+                 (click)="onClickItem('name', log.Phonebook?.name)">{{log.Phonebook?.name}}</a>
+              <div class="search callerid" *ngIf="!log.Phonebook?.name">Not Provided</div>
+            </h5>
+            <h6>
+              <a class="search call_caller_number"
+                 (click)="onClickItem('number', log.callerNumber)">{{log.callerNumber !== 'anonymous' && log.callerNumber| fixed | mask: '(000) 000-0000'}}</a>
+            </h6>
+            <p>
+              <a data-field="city" class="search"
+                 (click)="onClickItem('city', log.Phonebook?.city)">{{log.Phonebook?.city ? log.Phonebook?.city + ', ' : 'No location'}}</a>
+              <a class="search" (click)="onClickItem('state', log.Phonebook?.state)">{{log.Phonebook?.state}}</a>&nbsp;
+              <a class="search" (click)="onClickItem('country', log.Phonebook?.country)">{{log.Phonebook?.country}}</a>
+            </p>
+          </td>
+
+          <!------------------------------------------- Source Cell ------------------------------------->
+          <td *ngIf="!log.isCollapse">
+            <h6>
+              <a class="search" *ngIf="log.OpNumber?.TrackingSources?.name"
+                 (click)="onClickItem('source', log.OpNumber?.TrackingSources?.name)">
+                <i class="fa fa-newspaper-o size-md"></i> {{log.OpNumber?.TrackingSources?.name}}
+              </a>
+              <div class="search" *ngIf="!log.OpNumber?.TrackingSources?.name">There is no source</div>
+              <!--
+                <a class="search" *ngIf="log.trackingSourceName"
+                  (click)="onClickItem('trackingSourceName', log.trackingSourceName)">
+                  <i class="fa fa-newspaper-o size-md"></i> {{log.trackingSourceName}}</a>
+                <div class="search" *ngIf="!log.trackingSourceName">There is no source</div>
+              -->
+            </h6>
+            <h6>
+              <a class="search" (click)="onClickItem('op_tracking_number', log.OpNumber?.tracking_number)">
+                {{log.OpNumber?.tracking_number | fixed | mask: '(000) 000-0000'}}
+              </a>
+              <!-- <a class="search" (click)="onClickItem('trackingNumber', log.trackingNumber)">
+                {{log.trackingNumber | fixed | mask: '(000) 000-0000'}}
+              </a> -->
+            </h6>
+          </td>
+
+          <!------------------------------------------- Routing Cell ------------------------------------->
+          <td class="hidden-sm" *ngIf="!log.isCollapse">
+            <h6>
+              <!--<a class="search" *ngIf="log.OpNumber?.routingAction"-->
+              <!--(click)="onClickItem('routing', log.OpNumber?.sipGateway_address)">-->
+              <!--<i class="fa fa-map-signs size-md"></i>&nbsp;&nbsp;Routing Rule:</a>-->
+              <div class="search" *ngIf="!log.OpNumber?.routingAction">No Routing</div>
+            </h6>
+            <h6 class="color-blue"
+                *ngIf="log.OpNumber?.routingAction && (log.OpNumber?.sipGateway_address || log.OpNumber?.receivingNumber_number)">
+              <!--<a class="search" *ngIf="log.OpNumber?.routingAction === 'forward_to'"-->
+              <!--(click)="onClickItem('receiving_number', log.OpNumber?.ReceivingNumber?.number)">&nbsp;Forward to {{log.OpNumber?.sipGateway_address}} ({{log.OpNumber?.sipGateway_description}})</a>-->
+              <!--<a class="search" *ngIf="log.OpNumber?.routingAction === 'remap_forward_to'"-->
+              <!--(click)="onClickItem('receiving_number', log.OpNumber?.ReceivingNumber?.number)">&nbsp;Remap with {{log.OpNumber?.ReceivingNumber?.number | fixed | mask: '(000) 000-0000'}} and forward to {{log.OpNumber?.sipGateway_address}}</a>-->
+              <a class="search"
+                 (click)="onClickItem('receiving_number', log.OpNumber?.ReceivingNumber?.number)">{{log.OpNumber?.sipGateway_name}}</a>
+            </h6>
+            <!--
+            <h6>
+                <a class="search" *ngIf="log.routingAddress"
+                  (click)="onClickItem('routingAddress', log.routingAddress)">
+                  <i class="fa fa-newspaper-o size-md"></i> {{log.routingAddress}}
+                </a>
+                <div class="search" *ngIf="!log.routingAddress">No Routing</div>
+            </h6>
+            <h6 class="color-blue" *ngIf="log.receivingNumber && log.receivingNumber != 'null'" >
+                <a class="search"
+                  (click)="onClickItem('receivingNumber', log.receivingNumber)">{{log.receivingNumber | fixed | mask: '(000) 000-0000'}}
+                </a>
+            </h6>
+            -->
+          </td>
+
+          <!------------------------------------------- Audio Cell ------------------------------------->
+          <td class="hidden-sm" *ngIf="!log.isCollapse">
+            <div class="audio-wrapper action">
+              <a (click)="onPlayAudio(log.id, true)" *ngIf="log.callrecordingId && (!isPlay || log.id !== playId)">
+                <i class="fa fa-play size-md" style="font-size: 20px;"></i>
+                <p class="text color-blue">audio</p>
+              </a>
+              <p *ngIf="!log.callrecordingId" style="margin-bottom: 2px">No Audio</p>
+              <div style="margin-bottom: -5px;">
+                <audio controls="controls" autoplay="autoplay"
+                       style="height: 15px; margin-bottom: 10px; margin-left: -2px" *ngIf="isPlay && log.id === playId">
+                  <source [src]="content">
+                </audio>
+                <a *ngIf="isPlay && log.id === playId" style="display: block;margin-top: -20px;"
+                   (click)="onPlayAudio(log.id, false)"><span style="font-size: 20px;color: red">x</span></a>
+              </div>
+              <span class="duration">
+                    {{(log.duration / 60) | round | number: '2.0-0'}}:{{(log.duration) % 60 | number: '2.0-0'}}
+                    </span>
+            </div>
+          </td>
+
+          <!------------------------------------------- Metrics Cell ------------------------------------->
+          <td *ngIf="!log.isCollapse">
+            <div class="source-detail">
+              <div class="source-info activity-date">
+                <span><i class="pi pi-calendar"></i>&nbsp;{{ log.metrics && getDateStringOfCallRecord(log.created) }} </span>
+              </div>
+              <div class="source-info activity-time">
+                                                <span data-placement="left">
+                    <i class="pi pi-clock"></i>&nbsp;{{ log.metrics && log.metrics.split('\n')[0] | time }}
+                  </span>
+              </div>
+              <div class="source-info activity-status">
+                  <span><i class="pi pi-phone"></i><span>&nbsp;{{ log.metrics && log.metrics.split('\n')[1] }}</span>
+                                                </span>
+              </div>
+              <div class="source-info activity-transfer">
+                <span><i class="pi pi-info-circle"></i></span>
+                <span>&nbsp;{{ log.metrics && log.metrics.split('\n')[2] }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!------------------------------------------- Action Cell ------------------------------------->
+          <td class="hidden-sm" *ngIf="!log.isCollapse" [hidden]="permission==permissionTypeReadOnly">
+            <div class="action" *ngIf="false">
+              <a class="action inline-block" (click)="onEditPanelCollapse(getRowIndex(log), 'email')">
+                <i class="pi pi-reply"></i>
+                <span class="text">Email</span>
+              </a>&nbsp;&nbsp;
+              <a class="action inline-block">
+                <i class="pi pi-flag"></i>
+                <span class="text">Flag</span>
+
+              </a>
+            </div>
+          </td>
+
+          <!------------------------------------------- Edit Panel ------------------------------------->
+          <td *ngIf="log.isCollapse" colspan="7" class="p-0 edit-panel">
+            <div class="grid" style="padding: 10px 2px;">
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="grid">
+    <!--    <p-paginator [rows]="pageSize" [totalRecords]="totalCount" (onPageChange)="paginate($event)"></p-paginator>-->
+  </div>
+</div>
